@@ -1,15 +1,21 @@
-# Déployer les VMs avec Ansible
+# ansible-proxmoxve
+
+## But du projet
+
+Faciliter le déploiement de cluster ProxmoxVE via Scaleway et Ansible
+
+## Déployer les VMs avec Ansible
 
 https://docs.ansible.com/ansible/latest/modules/scaleway_image_facts_module.html#scaleway-image-facts-module
 
-## Prérequis
+### Prérequis
 
 * Avoir un compte sur Scaleway
 * Avoir une clé SSH, avoir la clé publique à la racine du projet, et l'appeler admin.pub
 * Installer Ansible (> 2.7)
 * Installer le package pip jmespath
 
-## Token
+### Token
 
 Créer un token sur le site de Scaleway pour les accès distants et le stocker dans un fichier scaleway_token
 
@@ -23,7 +29,7 @@ Sourcer le fichier
 source scaleway_token
 ```
 
-## Générer les machines
+### Générer les machines
 
 Utiliser le playbook create_proxmox_vms.yaml pour :
 
@@ -33,10 +39,10 @@ Utiliser le playbook create_proxmox_vms.yaml pour :
 * créer autant de machines que nécessaire
 
 ```bash
-ansible-playbook create_proxmox_vms.yaml
+ansible-playbook create_proxmox_vms.yml
 ```
 
-## Mise en place de l'inventaire dynamique (inventory.yml)
+### Mise en place de l'inventaire dynamique (inventory.yml)
 
 ```YAML
 plugin: scaleway
@@ -92,7 +98,11 @@ z.z.z.z | SUCCESS => {
 }
 ```
 
-# Installation manuelle
+## Préparation du serveur
+
+aaa
+
+## Installation manuelle
 
 https://pve.proxmox.com/wiki/Install_Proxmox_VE_on_Debian_Stretch
 
