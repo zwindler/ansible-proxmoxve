@@ -1,12 +1,102 @@
+# Déployer les VMs avec Ansible
+
+https://docs.ansible.com/ansible/latest/modules/scaleway_image_facts_module.html#scaleway-image-facts-module
+
+## Prérequis
+
+* Avoir un compte sur Scaleway
+* Avoir une clé SSH, avoir la clé publique à la racine du projet, et l'appeler admin.pub
+* Installer Ansible (> 2.7)
+* Installer le package pip jmespath
+
+## Token
+
+Créer un token sur le site de Scaleway pour les accès distants et le stocker dans un fichier scaleway_token
+
+```bash
+export SCW_API_KEY='aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa'
+```
+
+Sourcer le fichier
+
+```bash
+source scaleway_token
+```
+
+## Générer les machines
+
+Utiliser le playbook create_proxmox_vms.yaml pour :
+
+* récupérer l'ID d'organisation du compte Scaleway
+* récupérer un ID d'image compatible debian Stretch
+* ajouter si nécessaire la clé SSH de l'admin
+* créer autant de machines que nécessaire
+
+```bash
+ansible-playbook create_proxmox_vms.yaml
+```
+
+## Mise en place de l'inventaire dynamique (inventory.yml)
+
+```YAML
+plugin: scaleway
+regions:
+  - par1
+tags:
+  - proxmoxve
+```
+
+Vérifier le retour de la commande ansible-inventory
+
+```JSON
+ansible-inventory --list -i inventory.yml
+{
+    "_meta": {
+        "hostvars": {
+            "51.15.211.198": {
+                "arch": "x86_64",
+                "commercial_type": "START1-S",
+                "hostname": "proxmox3",
+[...]
+    "proxmoxve": {
+        "hosts": [
+            "x.x.x.x",
+            "y.y.y.y",
+            "z.z.z.z"
+        ]
+    }
+
+```
+
+Récupérer les empreintes de nos nouveaux serveurs pour éviter une erreur lors de la première connexion
+
+```bash
+ansible-inventory --list -i inventory.yml | jq -r '.proxmoxve.hosts | .[]' | xargs ssh-keyscan >> ~/.ssh/known_hosts
+```
+
+Vérifier qu'on peut se connecter à tous les serveurs via Ansible
+
+```JSON
+ansible proxmoxve -i inventory.yml -u root -m ping
+x.x.x.x | SUCCESS => {
+    "changed": false,
+    "ping": "pong"
+}
+y.y.y.y | SUCCESS => {
+    "changed": false,
+    "ping": "pong"
+}
+z.z.z.z | SUCCESS => {
+    "changed": false,
+    "ping": "pong"
+}
+```
+
 # Installation manuelle
 
 https://pve.proxmox.com/wiki/Install_Proxmox_VE_on_Debian_Stretch
 
-## Dans la console scaleway
-
-* Créer une VM de type S
-* Dans les options, retirer l'IPv6
-* Modifier le fichier host
+Modifier le fichier host
 
 ```bash
 cat /etc/hosts
@@ -18,106 +108,13 @@ ff02::1         ip6-allnodes
 ff02::2         ip6-allrouters
 ```
 
+Installer les packages, puis reboot
+
+```bash
 echo "deb http://download.proxmox.com/debian/pve stretch pve-no-subscription" > /etc/apt/sources.list.d/pve-install-repo.list
 wget http://download.proxmox.com/debian/proxmox-ve-release-5.x.gpg -O /etc/apt/trusted.gpg.d/proxmox-ve-release-5.x.gpg
 apt update && apt dist-upgrade
 
 apt install proxmox-ve postfix open-iscsi
 apt remove os-prober
-
-# Déployer les VMs avec Ansible
-
-https://docs.ansible.com/ansible/latest/modules/scaleway_image_facts_module.html#scaleway-image-facts-module
-
-## Prérequis
-
-Avoir une clé SSH, avoir la clé publique à la racine du projet, et l'appeler admin.pub
-
-## Générer les machines
-
-Créer un playbook pour
-
-* récupérer un ID d'image compatible debian Stretch
-* créer autant de machines que nécessaire
-
-```YAML
-cat scaleway/create_proxmox.yaml
----
-- hosts: localhost
-  connection: local
-  tasks:
-  - name: "Add SSH key"
-    scaleway_sshkey:
-      ssh_pub_key: "{{lookup('file', 'admin.pub') }}"
-      state: "present"
-  - name: Gather Scaleway images facts
-    scaleway_image_facts:
-      region: par1
-  - name: "Create my servers"
-    scaleway_compute:
-      name: proxmox{{item}}
-      state: running
-      image: "37832f54-c18f-4338-a552-113e4302a236"
-      organization: 1bb690d9-1039-4316-abec-91903df637af
-      region: par1
-      commercial_type: START1-S
-      wait: true
-      tags: proxmoxve
-    loop: "{{ range(0, 4 + 1, 2)|list }}"
 ```
-
-# Installer proxmox avec Ansible
-
-## Mise en place de l'inventaire
-
-cat scaleway/inventory_proxmox.yml
-plugin: scaleway
-regions:
-  - par1
-tags:
-  - proxmoxve
-
-```JSON
-ansible-inventory --list -i scaleway/inventory_proxmox.yml
-{
-    "_meta": {
-        "hostvars": {
-            "51.15.217.222": {
-                "arch": "x86_64", 
-                "commercial_type": "START1-S", 
-                "hostname": "proxmox01", 
-                "id": "95f9bc84-20d5-40ea-85bf-adba7159bf73", 
-                "organization": "1bb690d9-1039-4316-abec-91903df637af", 
-                "private_ipv4": "10.16.166.25", 
-                "public_ipv4": "51.15.217.222", 
-                "state": "running", 
-                "tags": [
-                    "proxmoxve"
-                ]
-            }
-        }
-    }, 
-    "all": {
-        "children": [
-            "par1", 
-            "proxmoxve", 
-            "ungrouped"
-        ]
-    }, 
-    "par1": {
-        "hosts": [
-            "51.15.217.222"
-        ]
-    }, 
-    "proxmoxve": {
-        "hosts": [
-            "51.15.217.222"
-        ]
-    }, 
-    "ungrouped": {}
-}
-```
-
-
-
-http://www.oznetnerd.com/jinja2-selectattr-filter/

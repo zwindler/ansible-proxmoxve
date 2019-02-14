@@ -28,4 +28,5 @@
       commercial_type: START1-S
       wait: true
       tags: proxmoxve
+      public_ip: dynamic
     loop: "{{ range(1, 3 + 1)|list }}"
