@@ -100,7 +100,9 @@ z.z.z.z | SUCCESS => {
 
 ## Préparation du serveur
 
-aaa
+```bash
+ansible-playbook -i inventory.yml -u root proxmox_prerequisites.yml
+```
 
 ## Installation manuelle
 

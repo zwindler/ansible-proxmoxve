@@ -1,0 +1,48 @@
+---
+- hosts: proxmoxve
+  vars_prompt:
+    - name: yourdomain
+      prompt: "Enter the domain name to append to the hostname"
+      default: zwindler.fr
+      private: no
+  tasks:
+  - name: Modify /etc/hosts files to proxmox standards
+    template:
+      src: hosts.j2
+      dest: /etc/hosts
+  - name: "Install Aptitude (recommended when using apt ansible module) and update repositories cache"
+    apt:
+      name: aptitude
+      state: present
+      update_cache: yes
+      cache_valid_time: 3600
+  - name: "Apt upgrade"
+    apt:
+      upgrade: yes
+  - name: "Add proxmoxve archive repository keys"
+    apt_key:
+      url: "http://download.proxmox.com/debian/proxmox-ve-release-5.x.gpg"
+      state: present
+  - name: "Add proxmoxve archive repository and update cache"
+    apt_repository:
+      repo: "deb http://download.proxmox.com/debian/pve stretch pve-no-subscription"
+      state: present
+      update_cache: yes
+  - name: "Apt upgrade"
+    apt:
+      upgrade: dist
+  - name: "Install packages"
+    apt:
+      name: "{{item}}"
+      state: present
+    loop:
+      - proxmox-ve
+      - postfix
+      - open-iscsi
+  - name: "Remove packages"
+    apt:
+      name: "{{item}}"
+      state: present
+    loop:
+      - os-prober
+    
