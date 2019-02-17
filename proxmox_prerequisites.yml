@@ -5,6 +5,10 @@
       prompt: "Enter the domain name to append to the hostname"
       default: zwindler.fr
       private: no
+    - name: rebootyesno
+      prompt: "Server should be rebooted after first install. Is it OK ? (yes/no)"
+      default: no
+      private: no
   tasks:
   - name: Modify /etc/hosts files to proxmox standards
     template:
@@ -45,4 +49,8 @@
       state: present
     loop:
       - os-prober
-    
+  - name: "Reboot node after first install"
+    shell: "/sbin/shutdown -r -t 1 > /tmp/first_install_ok"
+    args: 
+      creates: /tmp/first_install_ok
+    when: rebootyesno == "yes"
