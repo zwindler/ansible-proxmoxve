@@ -6,8 +6,14 @@ https://docs.ansible.com/ansible/latest/modules/scaleway_image_facts_module.html
 
 * Avoir un compte sur Scaleway
 * Avoir une clé SSH, avoir la clé publique à la racine du projet, et l'appeler admin.pub
-* Installer Ansible (> 2.7)
-* Installer le package pip jmespath
+* Installer les package pip
+
+```bash
+pip install  jinja2 PyYAML paramiko cryptography packaging
+```
+
+* Installer Ansible depuis les sources (>= 2.8devel)
+* Installer jq
 
 ## Token
 
@@ -74,7 +80,13 @@ Récupérer les empreintes de nos nouveaux serveurs pour éviter une erreur lors
 ansible-inventory --list -i inventory.yml | jq -r '.proxmoxve.hosts | .[]' | xargs ssh-keyscan >> ~/.ssh/known_hosts
 ```
 
-Vérifier qu'on peut se connecter à tous les serveurs via Ansible
+
+Ajouter sa clé SSH dans l'agent, puis vérifier qu'on peut se connecter à tous les serveurs via Ansible
+
+```bash
+eval `ssh-agent`
+ssh-add myprivate.key
+```
 
 ```JSON
 ansible proxmoxve -i inventory.yml -u root -m ping
