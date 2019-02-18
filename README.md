@@ -6,7 +6,7 @@ Faciliter le déploiement de cluster ProxmoxVE via Scaleway et Ansible
 
 ## Déployer les VMs avec Ansible
 
-https://docs.ansible.com/ansible/latest/modules/scaleway_image_facts_module.html#scaleway-image-facts-module
+[https://docs.ansible.com/ansible/latest/modules/scaleway_image_facts_module.html#scaleway-image-facts-module]
 
 ### Prérequis
 
@@ -23,7 +23,7 @@ pip install  jinja2 PyYAML paramiko cryptography packaging
 
 ### Token
 
-Créer un token sur le site de Scaleway pour les accès distants et le stocker dans un fichier scaleway_token
+Créer un token sur le site de Scaleway pour les accès distants et le stocker dans un fichier scaleway\_token
 
 ```bash
 export SCW_API_KEY='aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa'
@@ -37,7 +37,7 @@ source scaleway_token
 
 ### Générer les machines
 
-Utiliser le playbook create_proxmox_vms.yaml pour :
+Utiliser le playbook create\_proxmox\_vms.yaml pour :
 
 * récupérer l'ID d'organisation du compte Scaleway
 * récupérer un ID d'image compatible debian Stretch
@@ -122,6 +122,26 @@ A l'issue de l'installation, rebooter les serveurs (manuellement ou via ansible)
 ```bash
 ansible-playbook -i inventory.yml -u root tinc_installation.yml
 ```
+
+## Etapes additionnelles
+
+Se connecter manuellemement sur tous les serveurs et configurer un mot de passe pour l'utilisateur root (absolument nécessaire pour la création du cluster).
+
+### Créer un cluster
+
+* Se connecter à l'UI de Proxmox avec un des noeuds
+* Dans Datacenter (à gauche), sélectionner Cluster puis cliquer sur "Create Cluster"
+* Donner un nom au cluster, **mais surtout, donner comme adresse ring0 l'adresse VPN** (10.10.10.1 si on est sur le noeud 1)
+* Une fois l'opération terminée, cliquer sur "Join Information", dans le même menu, et copier les informations en cliquant sur "Copy Information"
+
+### Joindre le cluster
+
+* Se connecter sur l'UI de la 2ème machine
+* Dans Datacenter, sélectionner Cluster puis cliquer sur "Join Cluster"
+* Dans le champ "Information", coller les données récupérée lors de l'étape précédente. Les informations de connexion devraient automatiquement être remplies, **SAUF le Corosync ring0, qu'il faut positionner à 10.10.10.2"**, et le mot de passe root du noeud 1. Cliquer sur "Join".
+* Si l'opération réussie, un message doit s'afficher pour dire de recharger la page
+
+Répéter l'opération pour les noeuds suivants (3 voire ++)
 
 ## Autre
 
