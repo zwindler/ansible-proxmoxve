@@ -2,3 +2,4 @@
 *retry
 *pub
 archive
+proxmox[0-9]*

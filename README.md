@@ -65,7 +65,7 @@ ansible-inventory --list -i inventory.yml
 {
     "_meta": {
         "hostvars": {
-            "51.15.211.198": {
+            "x.x.x.x": {
                 "arch": "x86_64",
                 "commercial_type": "START1-S",
                 "hostname": "proxmox3",
@@ -85,7 +85,6 @@ Récupérer les empreintes de nos nouveaux serveurs pour éviter une erreur lors
 ```bash
 ansible-inventory --list -i inventory.yml | jq -r '.proxmoxve.hosts | .[]' | xargs ssh-keyscan >> ~/.ssh/known_hosts
 ```
-
 
 Ajouter sa clé SSH dans l'agent, puis vérifier qu'on peut se connecter à tous les serveurs via Ansible
 
@@ -116,29 +115,10 @@ z.z.z.z | SUCCESS => {
 ansible-playbook -i inventory.yml -u root proxmox_prerequisites.yml
 ```
 
-## Installation manuelle
+A l'issue de l'installation, rebooter les serveurs (manuellement ou via ansible)
 
-https://pve.proxmox.com/wiki/Install_Proxmox_VE_on_Debian_Stretch
-
-Modifier le fichier host
+## Installation et configuration de tinc
 
 ```bash
-cat /etc/hosts
-10.16.166.25    proxmox01 #IP interne
-51.15.217.222   proxmox01.zwindler.fr #IP externe
-127.0.0.1       localhost #remove proxmox01 from here
-::1             localhost ip6-localhost ip6-loopback
-ff02::1         ip6-allnodes
-ff02::2         ip6-allrouters
-```
-
-Installer les packages, puis reboot
-
-```bash
-echo "deb http://download.proxmox.com/debian/pve stretch pve-no-subscription" > /etc/apt/sources.list.d/pve-install-repo.list
-wget http://download.proxmox.com/debian/proxmox-ve-release-5.x.gpg -O /etc/apt/trusted.gpg.d/proxmox-ve-release-5.x.gpg
-apt update && apt dist-upgrade
-
-apt install proxmox-ve postfix open-iscsi
-apt remove os-prober
+ansible-playbook -i inventory.yml -u root tinc_installation.yml
 ```

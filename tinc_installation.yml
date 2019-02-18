@@ -1,0 +1,58 @@
+---
+- hosts: proxmoxve
+  tasks:
+  - name: "Remove pve-entreprise repo if necessary"
+    file: 
+      path: /etc/apt/sources.list.d/pve-enterprise.list
+      state: absent
+  - name: "Update cache then install tinc"
+    apt:
+      name: tinc
+      state: present
+      update_cache: yes
+  - name: "Add cluster name in nets.boot file"
+    lineinfile:
+      path: /etc/tinc/nets.boot
+      line: "pvecluster"
+  - name: "Create a host config on each node"
+    template: 
+      src: tinchost.j2
+      dest: /etc/tinc/pvecluster/tinc.conf
+  - name: "Create tinc host folder"
+    file:
+      dest: /etc/tinc/pvecluster/hosts
+      state: directory      
+  - name: "Create a host config in hosts dir"
+    template:
+      src: tinchost.j2
+      dest: "/etc/tinc/pvecluster/hosts/{{ansible_hostname}}"
+      force: no
+  - name: "Generate keys on all cluster members"
+    shell: "echo -e '\n\n' | tincd -n pvecluster -K4096"
+    args: 
+      creates: /etc/tinc/pvecluster/rsa_key.priv
+  - name: "Get all hosts configs from each nodes"
+    fetch: 
+      src: /etc/tinc/pvecluster/hosts/{{ansible_hostname}}
+      dest: "files/{{ansible_hostname}}"
+      flat: yes
+  - name: "Copy all the config files on all the nodes"
+    copy:
+      src: "{{hostvars[item]['ansible_hostname']}}"
+      dest: "/etc/tinc/pvecluster/hosts/"
+    loop: "{{groups['proxmoxve']}}"
+  - name: "Create tinc up script"
+    template: 
+      src: tinc-up.j2
+      dest: /etc/tinc/pvecluster/tinc-up
+      mode: 0755
+  - name: "Create tinc down script"
+    template: 
+      src: tinc-down.j2
+      dest: /etc/tinc/pvecluster/tinc-down
+      mode: 0755      
+  - name: "Start tinc VPN"
+    systemd:
+      name: tinc@pvecluster
+      state: restarted
+      daemon_reload: yes
