@@ -122,3 +122,11 @@ A l'issue de l'installation, rebooter les serveurs (manuellement ou via ansible)
 ```bash
 ansible-playbook -i inventory.yml -u root tinc_installation.yml
 ```
+
+## Autre
+
+Réinitialiser le fichier known\_hosts
+
+```bash
+sed -ri '/^([0-9]+\.){3}[0-9]+ /d' ~/.ssh/known_hosts
+```
