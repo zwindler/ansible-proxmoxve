@@ -1,0 +1,29 @@
+---
+- hosts: proxmoxve
+  vars_prompt:
+    - name: adminusername
+      prompt: "Enter the admin username"
+      private: no
+    - name: adminpassword
+      prompt: "Enter the adminpassword"
+  tasks:
+  - name: "Create admin group"
+    shell: "pveum groupadd admin -comment 'System Administrators' > /tmp/admingroup"
+    args: 
+      creates: /tmp/admingroup
+  - name: "Add group ACL"
+    shell: "pveum aclmod / -group admin -role Administrator > /tmp/groupacl"
+    args: 
+      creates: /tmp/groupacl
+  - name: "Add admin user"
+    shell: "pveum user add {{adminusername}}@pve > /tmp/adminuser"
+    args:
+      creates: /tmp/adminuser
+  - name: "Add admin to admin group"
+    shell: "pveum usermod {{adminusername}}@pve -group admin > /tmp/adminusertogroup"
+    args:
+      creates: /tmp/adminusertogroup
+  - name: "Add admin password"
+    shell: "echo -e '{{adminpassword}}\n{{adminpassword}}\n' | pveum passwd {{adminusername}}@pve > /tmp/adminpwd"
+    args:
+      creates: /tmp/adminpwd
