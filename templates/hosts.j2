@@ -1,9 +1,13 @@
 #Internal IPs
 {% for host in groups['proxmoxve'] -%}
-{{ hostvars[host]['ansible_default_ipv4']['address'] }} {{ hostvars[host]['ansible_hostname'] }}
+{{ hostvars[host]['ansible_default_ipv4']['address'] }} {{hostvars[host]['ansible_hostname']}}.internal
 {% endfor %}
 #External IPs
 {{ansible_host}}   {{ansible_facts.hostname}}.{{yourdomain}}
+#VPN IPs
+{% for host in groups['proxmoxve'] -%}
+10.10.10.{{loop.index}} proxmox{{loop.index}}
+{% endfor %}
 #Default stuff
 127.0.0.1       localhost
 ::1             localhost ip6-localhost ip6-loopback
