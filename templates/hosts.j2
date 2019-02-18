@@ -1,5 +1,10 @@
-{{ansible_facts.default_ipv4.address}}    {{ansible_facts.hostname}} #Internal IP
-{{ansible_host}}   {{ansible_facts.hostname}}.{{yourdomain}} #External IP
+#Internal IPs
+{% for host in groups['proxmoxve'] -%}
+{{ hostvars[host]['ansible_default_ipv4']['address'] }} {{ hostvars[host]['ansible_hostname'] }}
+{% endfor %}
+#External IPs
+{{ansible_host}}   {{ansible_facts.hostname}}.{{yourdomain}}
+#Default stuff
 127.0.0.1       localhost
 ::1             localhost ip6-localhost ip6-loopback
 ff02::1         ip6-allnodes
