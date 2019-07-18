@@ -1,6 +1,8 @@
 ---
 - hosts: proxmoxve
   tasks:
+  - name: "Regenerate PVE certs to avoid pve-ssl.pem not found"
+    shell: "pvecm updatecerts -f"
   - name: "Remove pve-entreprise repo if necessary"
     file: 
       path: /etc/apt/sources.list.d/pve-enterprise.list
@@ -14,14 +16,18 @@
     lineinfile:
       path: /etc/tinc/nets.boot
       line: "pvecluster"
+  - name: "Create /etc/tinc/pvecluster directory"
+    file:
+      path: "{{item}}"
+      state: directory
+      mode: '0755'
+    loop:
+      - /etc/tinc/pvecluster
+      - /etc/tinc/pvecluster/hosts
   - name: "Create a host config on each node"
     template: 
       src: tinchost.j2
       dest: /etc/tinc/pvecluster/tinc.conf
-  - name: "Create tinc host folder"
-    file:
-      dest: /etc/tinc/pvecluster/hosts
-      state: directory      
   - name: "Create a host config in hosts dir"
     template:
       src: tinchost.j2
