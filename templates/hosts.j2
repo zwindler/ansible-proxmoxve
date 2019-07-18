@@ -6,7 +6,7 @@
 {{ansible_host}}   {{ansible_facts.hostname}}.{{yourdomain}}
 #VPN IPs
 {% for host in groups['proxmoxve'] -%}
-10.10.10.{{loop.index}} proxmox{{loop.index}}
+10.10.10.{{loop.index}} {{vmprefix}}{{loop.index}}
 {% endfor %}
 #Default stuff
 127.0.0.1       localhost

@@ -1,15 +1,20 @@
 ---
 - hosts: proxmoxve
   vars_prompt:
-    - name: yourdomain
-      prompt: "Enter the domain name to append to the hostname"
-      default: zwindler.fr
-      private: no
-    - name: rebootyesno
-      prompt: "Server should be rebooted after first install. Is it OK ? (yes/no)"
-      default: no
-      private: no
+  - name: yourdomain
+    prompt: "Enter the domain name to append to the hostname"
+    default: zwindler.fr
+    private: no
+  - name: rebootyesno
+    prompt: "Server should be rebooted after first install. Is it OK ? (yes/no)"
+    default: no
+    private: no
+  - name: vmprefix
+    prompt: "Enter a prefix for the VM names"
+    default: "proxmox"
+    private: no
   tasks:
+  #- debug: var=ansible_facts
   - name: Modify /etc/hosts files to proxmox standards
     template:
       src: hosts.j2

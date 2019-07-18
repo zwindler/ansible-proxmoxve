@@ -1,6 +1,15 @@
 ---
 - hosts: localhost
   connection: local
+  vars_prompt:
+  - name: commercial_type
+    prompt: "Enter the wanted type for the instances"
+    default: DEV1-S
+    private: no
+  - name: vmprefix
+    prompt: "Enter a prefix for the VM names"
+    default: "proxmox"
+    private: no
   tasks:
   - name: Gather Scaleway images facts
     scaleway_image_facts:
@@ -8,7 +17,7 @@
   - name: Find a suitable Debian Stretch x86 image
     set_fact:
       x86image: "{{item.id}}"
-    when: item.arch == "x86_64" and item.name == "Debian Stretch" and item.root_volume.size == 50000000000
+    when: item.arch == "x86_64" and item.name == "Debian Stretch" and item.root_volume.size == 10000000000
     loop: "{{ scaleway_image_facts }}"
   - name: Gather Scaleway organizations facts
     scaleway_organization_facts:
@@ -20,12 +29,12 @@
 
   - name: "Create my servers"
     scaleway_compute:
-      name: proxmox{{item}}
+      name: "{{vmprefix}}{{item}}"
       state: running
       image: "{{x86image}}"
       organization: "{{scaleway_organization_facts[0].id}}"
       region: par1
-      commercial_type: START1-S
+      commercial_type: "{{commercial_type}}"
       wait: true
       tags: proxmoxve
       public_ip: dynamic
