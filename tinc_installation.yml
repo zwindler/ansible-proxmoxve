@@ -1,5 +1,10 @@
 ---
 - hosts: proxmoxve
+  vars_prompt:
+  - name: vmprefix
+    prompt: "Enter a prefix for the VM names"
+    default: "proxmox"
+    private: no
   tasks:
   - name: "Regenerate PVE certs to avoid pve-ssl.pem not found"
     shell: "pvecm updatecerts -f"

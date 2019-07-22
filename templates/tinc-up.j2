@@ -1,5 +1,5 @@
 #!/bin/bash
 /sbin/ip link set pvecluster up
-/sbin/ip addr add 10.10.10.{{ ansible_hostname | regex_replace('proxmox','') }}/24 dev pvecluster
+/sbin/ip addr add 10.10.10.{{ ansible_hostname | regex_replace(vmprefix,'') }}/24 dev pvecluster
 /sbin/ip route add 10.10.10.0/24 dev pvecluster
 /sbin/route add -net 224.0.0.0 netmask 240.0.0.0 dev pvecluster
