@@ -3,7 +3,7 @@
   vars_prompt:
   - name: yourdomain
     prompt: "Enter the domain name to append to the hostname"
-    default: zwindler.fr
+    default: domain.tld
     private: no
   - name: rebootyesno
     prompt: "Server should be rebooted after first install. Is it OK ? (yes/no)"
