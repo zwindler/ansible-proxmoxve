@@ -1,0 +1,13 @@
+#External IPs
+{% for host in groups['proxmoxve'] -%}
+{{ hostvars[host]['ansible_default_ipv4']['address'] }} {{hostvars[host]['ansible_hostname']}}.{{yourdomain}}
+{% endfor %}
+#VPN IPs
+{% for host in groups['proxmoxve'] -%}
+10.10.10.{{loop.index}} {{vmprefix}}{{loop.index}}
+{% endfor %}
+#Default stuff
+127.0.0.1       localhost
+::1             localhost ip6-localhost ip6-loopback
+ff02::1         ip6-allnodes
+ff02::2         ip6-allrouters

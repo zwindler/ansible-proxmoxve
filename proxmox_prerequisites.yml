@@ -13,12 +13,22 @@
     prompt: "Enter a prefix for the VM names"
     default: "proxmox"
     private: no
+  - name: provider
+    prompt: "Do you use provided scaleway script to generate Proxmox servers ?"
+    default: no
+    private: no
   tasks:
   #- debug: var=ansible_facts
-  - name: Modify /etc/hosts files to proxmox standards
+  - name: "Modify /etc/hosts files to proxmox standards when working on Scaleway VMs"
     template:
-      src: hosts.j2
+      src: hosts.scaleway.j2
       dest: /etc/hosts
+    when: provider | bool
+  - name: "Modify etc/hosts files to proxmox standards when working with generic Debian"
+    template: 
+      src: hosts.generic.j2
+      dest: /etc/hosts
+    when: not (provider | bool)
   - name: "Install Aptitude (recommended when using apt ansible module) and update repositories cache"
     apt:
       name: aptitude
@@ -57,6 +67,10 @@
       state: present
     loop:
       - os-prober
+  - name: "Remove pve-entreprise repo if necessary"
+    file:
+      path: /etc/apt/sources.list.d/pve-enterprise.list
+      state: absent
   - name: "Reboot node after first install"
     shell: "/sbin/shutdown -r -t 1 > /tmp/first_install_ok"
     args: 
