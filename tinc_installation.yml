@@ -6,8 +6,8 @@
     default: "proxmox"
     private: no
   tasks:
-  - name: "Regenerate PVE certs to avoid pve-ssl.pem not found"
-    shell: "pvecm updatecerts -f"
+#  - name: "Regenerate PVE certs to avoid pve-ssl.pem not found"
+#    shell: "pvecm updatecerts -f"
   - name: "Remove pve-entreprise repo if necessary"
     file: 
       path: /etc/apt/sources.list.d/pve-enterprise.list
