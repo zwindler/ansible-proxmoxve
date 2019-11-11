@@ -1,0 +1,10 @@
+---
+- hosts: proxmoxve
+  tasks:
+  - name: "Install packages"
+    apt:
+      name: "{{item}}"
+      state: present
+    loop:
+      - openvswitch-switch
+      - zfsutils-linux
