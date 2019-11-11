@@ -1,0 +1,6 @@
+---
+- hosts: proxmoxve
+  gather_facts: no
+  pre_tasks:
+    - name: 'install python2'
+      raw: apt-get update && apt-get -y install python
